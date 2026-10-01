@@ -2,756 +2,988 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Controlador de Gastos Quincenal</title>
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      -webkit-tap-highlight-color: transparent;
-    }
-    body {
-      background-color: #0b0f19;
-      color: #f1f5f9;
-      padding: 16px;
-      padding-bottom: 70px;
-      max-width: 500px;
-      margin: 0 auto;
-    }
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 16px;
-      padding-bottom: 12px;
-      border-bottom: 1px solid #1e293b;
-    }
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .brand-icon {
-      width: 36px;
-      height: 36px;
-      background: #2563eb;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 18px;
-    }
-    .brand-text h1 {
-      font-size: 15px;
-      font-weight: 700;
-    }
-    .brand-text p {
-      font-size: 11px;
-      color: #94a3b8;
-    }
-    .btn-save {
-      background: #2563eb;
-      color: #fff;
-      border: none;
-      padding: 8px 14px;
-      border-radius: 8px;
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-    }
-    .btn-save:active {
-      background: #1d4ed8;
-    }
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestor Financiero Quincenal | PWA</title>
 
-    /* KPIs */
-    .kpi-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-bottom: 12px;
-    }
-    .kpi-card {
-      background: #131b2e;
-      border: 1px solid #1e293b;
-      border-radius: 14px;
-      padding: 12px;
-    }
-    .kpi-header {
-      display: flex;
-      justify-content: space-between;
-      font-size: 11px;
-      color: #94a3b8;
-      margin-bottom: 6px;
-    }
-    .badge {
-      background: #1e293b;
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-size: 10px;
-      color: #cbd5e1;
-    }
-    .kpi-value {
-      font-size: 18px;
-      font-weight: 800;
-      color: #10b981;
-    }
-    .kpi-value.danger {
-      color: #ef4444;
-    }
-    .kpi-sub {
-      font-size: 11px;
-      color: #94a3b8;
-      margin-top: 4px;
-      display: flex;
-      justify-content: space-between;
-    }
-    .kpi-sub .expense {
-      color: #f87171;
-      font-weight: 600;
-    }
-    .banner-total {
-      background: #131b2e;
-      border: 1px solid #2563eb40;
-      border-radius: 12px;
-      padding: 12px 14px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 16px;
-    }
-    .banner-total .label {
-      font-size: 11px;
-      color: #94a3b8;
-    }
-    .banner-total .amount {
-      font-size: 16px;
-      font-weight: 700;
-      color: #fff;
-    }
+  <!-- Metadatos PWA y Tema -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0ea5e9">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Finanzas">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
 
-    /* Cards & Inputs */
-    .section-card {
-      background: #131b2e;
-      border: 1px solid #1e293b;
-      border-radius: 16px;
-      padding: 14px;
-      margin-bottom: 14px;
-    }
-    .section-title {
-      font-size: 12px;
-      font-weight: 700;
-      color: #60a5fa;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-bottom: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .field-group {
-      margin-bottom: 10px;
-    }
-    .field-group:last-child {
-      margin-bottom: 0;
-    }
-    label {
-      display: block;
-      font-size: 11px;
-      font-weight: 500;
-      color: #cbd5e1;
-      margin-bottom: 4px;
-    }
-    .input-wrap {
-      position: relative;
-      display: flex;
-      align-items: center;
-    }
-    .input-wrap span.prefix {
-      position: absolute;
-      left: 10px;
-      color: #64748b;
-      font-size: 13px;
-    }
-    input[type=number], input[type=text], input[type=date], select {
-      width: 100%;
-      background: #090d16;
-      border: 1px solid #1e293b;
-      border-radius: 10px;
-      padding: 9px 10px;
-      color: #fff;
-      font-size: 13px;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-    input[type=number] {
-      padding-left: 24px;
-    }
-    input[type=number]:focus, input[type=text]:focus, input[type=date]:focus, select:focus {
-      border-color: #3b82f6;
-    }
-    .grid-2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-
-    /* Subcard Deudas Dinámicas */
-    .debt-item {
-      background: #090d16;
-      border: 1px solid #1e293b;
-      border-radius: 12px;
-      padding: 12px;
-      margin-bottom: 12px;
-      position: relative;
-    }
-    .debt-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 10px;
-    }
-    .debt-badge {
-      font-size: 10px;
-      background: #1e293b;
-      color: #60a5fa;
-      padding: 2px 7px;
-      border-radius: 4px;
-      font-weight: 600;
-      transition: all 0.3s;
-    }
-    .btn-del {
-      background: transparent;
-      border: none;
-      color: #ef4444;
-      font-size: 13px;
-      cursor: pointer;
-      padding: 2px 6px;
-    }
-    .btn-add {
-      width: 100%;
-      background: #1e293b;
-      border: 1px dashed #3b82f6;
-      color: #60a5fa;
-      padding: 10px;
-      border-radius: 10px;
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    .btn-add:active {
-      background: #2563eb20;
-    }
-
-    /* Botones píldora de asignación */
-    .btn-group {
-      display: flex;
-      gap: 4px;
-      margin-top: 8px;
-    }
-    .btn-pill {
-      flex: 1;
-      background: #131b2e;
-      border: 1px solid #1e293b;
-      color: #94a3b8;
-      border-radius: 6px;
-      padding: 6px 2px;
-      font-size: 10px;
-      font-weight: 500;
-      cursor: pointer;
-      text-align: center;
-      transition: all 0.2s ease-in-out;
-    }
-    .btn-pill.active {
-      background: #2563eb;
-      border-color: #3b82f6;
-      color: #fff;
-      font-weight: 700;
-    }
-
-    /* Tips */
-    .tips-box {
-      background: linear-gradient(180deg, #1e293b40, #131b2e);
-      border: 1px solid #2563eb30;
-      border-radius: 16px;
-      padding: 14px;
-    }
-    .tips-title {
-      font-size: 12px;
-      font-weight: 700;
-      color: #fbbf24;
-      text-transform: uppercase;
-      margin-bottom: 8px;
-    }
-    .tips-content {
-      font-size: 12px;
-      color: #cbd5e1;
-      line-height: 1.5;
-    }
-    .tips-content p {
-      margin-bottom: 6px;
-    }
-  </style>
-</head>
-<body>
-
-  <header>
-    <div class="brand">
-      <div class="brand-icon">💳</div>
-      <div class="brand-text">
-        <h1>FinControl Quincenal</h1>
-        <p>Tarjetas, Tiendas & Gastos</p>
-      </div>
-    </div>
-    <button class="btn-save" onclick="guardarLocal(true)">💾 Guardar</button>
-  </header>
-
-  <!-- Resumen de Balances Quincenales -->
-  <div class="kpi-grid">
-    <div class="kpi-card">
-      <div class="kpi-header">
-        <span>1ª Quincena</span>
-        <span class="badge">Día 1-15</span>
-      </div>
-      <div style="font-size: 10px; color: #94a3b8;">TE QUEDA LIBRE</div>
-      <div id="disp-q1-libre" class="kpi-value">$0.00</div>
-      <div class="kpi-sub">
-        <span>Gastos:</span>
-        <span id="disp-q1-gasto" class="expense">$0.00</span>
-      </div>
-    </div>
-
-    <div class="kpi-card">
-      <div class="kpi-header">
-        <span>2ª Quincena</span>
-        <span class="badge">Día 16-fin</span>
-      </div>
-      <div style="font-size: 10px; color: #94a3b8;">TE QUEDA LIBRE</div>
-      <div id="disp-q2-libre" class="kpi-value">$0.00</div>
-      <div class="kpi-sub">
-        <span>Gastos:</span>
-        <span id="disp-q2-gasto" class="expense">$0.00</span>
-      </div>
-    </div>
-  </div>
-
-  <div class="banner-total">
-    <div>
-      <div class="label">Remanente Neto del Mes</div>
-      <div id="disp-total-mes" class="amount">$0.00</div>
-    </div>
-    <div style="text-align: right;">
-      <div class="label">Total Gastos del Mes</div>
-      <div id="disp-gastos-mes" class="amount" style="font-size: 13px; color: #f87171;">$0.00</div>
-    </div>
-  </div>
-
-  <!-- SECCIÓN 1: INGRESOS -->
-  <div class="section-card">
-    <div class="section-title">1. Tus Ingresos por Quincena</div>
-    <div class="grid-2">
-      <div class="field-group">
-        <label>Pago 1ª Quincena</label>
-        <div class="input-wrap">
-          <span class="prefix">$</span>
-          <input type="number" id="inp-q1" placeholder="0.00" step="any">
-        </div>
-      </div>
-      <div class="field-group">
-        <label>Pago 2ª Quincena</label>
-        <div class="input-wrap">
-          <span class="prefix">$</span>
-          <input type="number" id="inp-q2" placeholder="0.00" step="any">
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- SECCIÓN 2: CRÉDITO FIJO -->
-  <div class="section-card">
-    <div class="section-title">
-      <span>2. Crédito Principal</span>
-      <span class="badge" style="color: #fbbf24;">Fijo Mensual</span>
-    </div>
-    <div class="field-group">
-      <label>Monto a Pagar al Mes</label>
-      <div class="input-wrap">
-        <span class="prefix">$</span>
-        <input type="number" id="inp-credito" value="7212.05" step="any">
-      </div>
-    </div>
-    <label style="color: #94a3b8; margin-top: 8px;">¿Cómo apartas o pagas este crédito?</label>
-    <div class="btn-group">
-      <button type="button" class="btn-pill active" id="btn-cred-div" onclick="setCreditoModo('dividir')">Dividir 50/50</button>
-      <button type="button" class="btn-pill" id="btn-cred-q1" onclick="setCreditoModo('q1')">Solo 1ª Qna</button>
-      <button type="button" class="btn-pill" id="btn-cred-q2" onclick="setCreditoModo('q2')">Solo 2ª Qna</button>
-    </div>
-  </div>
-
-  <!-- SECCIÓN 3: TARJETAS Y DEUDAS DINÁMICAS -->
-  <div class="section-card">
-    <div class="section-title">
-      <span>3. Tarjetas, Tiendas y Deudas</span>
-      <span class="badge" id="count-deudas">0 cuentas</span>
-    </div>
-    
-    <div id="lista-deudas">
-      <!-- Elementos dinámicos -->
-    </div>
-
-    <button type="button" class="btn-add" onclick="agregarDeuda()">+ Agregar otra tarjeta o deuda</button>
-  </div>
-
-  <!-- SECCIÓN 4: CASA Y GASOLINA -->
-  <div class="section-card">
-    <div class="section-title">4. Gastos Corrientes</div>
-    
-    <div class="grid-2" style="margin-bottom: 10px;">
-      <div>
-        <label>Gasto de Casa / Despensa</label>
-        <div class="input-wrap">
-          <span class="prefix">$</span>
-          <input type="number" id="inp-casa" placeholder="0.00" step="any">
-        </div>
-      </div>
-      <div>
-        <label>Periodicidad</label>
-        <select id="sel-casa-modo" onchange="calcular()">
-          <option value="quincenal">Cada Quincena</option>
-          <option value="mensual">Mensual (Dividir 50/50)</option>
-          <option value="q1">Solo 1ª Quincena</option>
-          <option value="q2">Solo 2ª Quincena</option>
-        </select>
-      </div>
-    </div>
-
-    <div class="grid-2">
-      <div>
-        <label>Gasolina</label>
-        <div class="input-wrap">
-          <span class="prefix">$</span>
-          <input type="number" id="inp-gasolina" placeholder="0.00" step="any">
-        </div>
-      </div>
-      <div>
-        <label>Periodicidad</label>
-        <select id="sel-gasolina-modo" onchange="calcular()">
-          <option value="quincenal">Cada Quincena</option>
-          <option value="mensual">Mensual (Dividir 50/50)</option>
-          <option value="q1">Solo 1ª Quincena</option>
-          <option value="q2">Solo 2ª Quincena</option>
-        </select>
-      </div>
-    </div>
-  </div>
-
-  <!-- SECCIÓN 5: ESTRATEGIA DE PAGO -->
-  <div class="tips-box">
-    <div class="tips-title">💡 Consejos para tu Siguiente Pago</div>
-    <div id="consejos-box" class="tips-content">
-      <!-- Consejos dinámicos -->
-    </div>
-  </div>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <script>
-    let creditoModo = 'dividir';
-    
-    // Lista inicial de deudas
-    let deudas = [
-      { id: 1, tipo: 'tc', nombre: 'Tarjeta de Crédito 1', monto: '', fecha: '', modo: 'auto' },
-      { id: 2, tipo: 'tc', nombre: 'Tarjeta de Crédito 2', monto: '', fecha: '', modo: 'auto' }
-    ];
-
-    function fmt(val) {
-      return '$' + Number(val || 0).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    }
-
-    function setCreditoModo(modo) {
-      creditoModo = modo;
-      ['div', 'q1', 'q2'].forEach(m => {
-        const btn = document.getElementById('btn-cred-' + m);
-        if (m === modo || (m === 'div' && modo === 'dividir')) {
-          btn.className = 'btn-pill active';
-        } else {
-          btn.className = 'btn-pill';
-        }
-      });
-      calcular();
-    }
-
-    function agregarDeuda() {
-      const nuevoId = Date.now();
-      deudas.push({
-        id: nuevoId,
-        tipo: 'tienda',
-        nombre: 'Nueva cuenta / Tienda',
-        monto: '',
-        fecha: '',
-        modo: 'auto'
-      });
-      renderDeudas();
-      calcular();
-    }
-
-    function eliminarDeuda(id) {
-      deudas = deudas.filter(d => d.id !== id);
-      renderDeudas();
-      calcular();
-    }
-
-    function actualizarDeuda(id, campo, valor) {
-      const item = deudas.find(d => d.id === id);
-      if (item) {
-        item[campo] = valor;
-        
-        // Asignar sugerencia de nombre si cambia el tipo
-        if (campo === 'tipo') {
-          if (valor === 'meli') item.nombre = 'Mercado Libre';
-          else if (valor === 'amazon') item.nombre = 'Amazon';
-          else if (valor === 'tc') item.nombre = 'Tarjeta de Crédito';
-          else if (valor === 'tienda') item.nombre = 'Liverpool / Coppel';
-        }
-
-        // Repintar la interfaz SOLO si el cambio afecta a los botones o las etiquetas.
-        // Esto evita que se pierda el foco del teclado al escribir números o letras.
-        if (campo === 'tipo' || campo === 'modo' || campo === 'fecha') {
-          renderDeudas();
-        }
-        
-        calcular();
-      }
-    }
-
-    function resolverAsignacionDeuda(d) {
-      if (d.modo === 'q1') return { q1: 1, q2: 0, label: '1ª Quincena' };
-      if (d.modo === 'q2') return { q1: 0, q2: 1, label: '2ª Quincena' };
-      if (d.modo === 'dividir') return { q1: 0.5, q2: 0.5, label: '50% y 50%' };
-      
-      // Auto por fecha (YYYY-MM-DD)
-      if (d.fecha) {
-        const partes = d.fecha.split('-');
-        if (partes.length === 3) {
-          const dia = parseInt(partes[2], 10);
-          const mes = parseInt(partes[1], 10);
-          const nombresMes = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
-          const mesNom = nombresMes[mes - 1] || '';
-          if (dia <= 15) {
-            return { q1: 1, q2: 0, label: `1ª Qna (${dia} ${mesNom})` };
-          } else {
-            return { q1: 0, q2: 1, label: `2ª Qna (${dia} ${mesNom})` };
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0f9ff',
+              500: '#0ea5e9',
+              600: '#0284c7',
+              700: '#0369a1',
+              900: '#0c4a6e',
+            },
+            dark: {
+              bg: '#090d16',
+              card: '#111827',
+              surface: '#1f2937',
+              border: '#374151'
+            }
           }
         }
       }
-      return { q1: 1, q2: 0, label: '1ª Quincena (Sin fecha)' };
     }
+  </script>
+  <style>
+    input[type="date"]::-webkit-calendar-picker-indicator {
+      filter: invert(0.8);
+    }
+    .custom-scroll::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: #374151;
+      border-radius: 9999px;
+    }
+    .custom-scroll::-webkit-scrollbar-track {
+      background: #111827;
+    }
+  </style>
+</head>
+<body class="bg-[#090d16] text-slate-100 min-h-screen font-sans antialiased pb-16 custom-scroll">
 
-    function renderDeudas() {
-      const contenedor = document.getElementById('lista-deudas');
-      document.getElementById('count-deudas').innerText = `${deudas.length} cuentas`;
-      
-      contenedor.innerHTML = deudas.map(d => {
-        const asig = resolverAsignacionDeuda(d);
-        return `
-          <div class="debt-item">
-            <div class="debt-header">
-              <span class="debt-badge">${asig.label}</span>
-              <button type="button" class="btn-del" onclick="eliminarDeuda(${d.id})">✕ Eliminar</button>
-            </div>
-            
-            <div class="grid-2" style="margin-bottom: 8px;">
-              <div>
-                <label>Tipo de Cuenta</label>
-                <select onchange="actualizarDeuda(${d.id}, 'tipo', this.value)">
-                  <option value="tc" ${d.tipo === 'tc' ? 'selected' : ''}>Tarjeta de Crédito</option>
-                  <option value="meli" ${d.tipo === 'meli' ? 'selected' : ''}>Mercado Libre</option>
-                  <option value="amazon" ${d.tipo === 'amazon' ? 'selected' : ''}>Amazon</option>
-                  <option value="tienda" ${d.tipo === 'tienda' ? 'selected' : ''}>Tienda Departamental</option>
-                  <option value="prestamo" ${d.tipo === 'prestamo' ? 'selected' : ''}>Préstamo / Otro</option>
-                </select>
-              </div>
-              <div>
-                <label>Nombre / Comercio</label>
-                <input type="text" value="${d.nombre || ''}" placeholder="Ej: Nu, Liverpool, etc." oninput="actualizarDeuda(${d.id}, 'nombre', this.value)">
-              </div>
-            </div>
+  <!-- BARRA DE NAVEGACIÓN -->
+  <header class="border-b border-gray-800 bg-[#0c121e]/80 backdrop-blur sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex justify-between items-center">
+      <div class="flex items-center gap-3">
+        <div class="h-10 w-10 rounded-xl bg-gradient-to-tr from-sky-500 to-emerald-400 flex items-center justify-center shadow-lg shadow-sky-500/20">
+          <i class="fa-solid fa-wallet text-slate-900 text-lg"></i>
+        </div>
+        <div>
+          <h1 class="text-base sm:text-lg font-bold tracking-tight text-white flex items-center gap-2">
+            Finanzas Quincenales <span class="text-[10px] uppercase font-semibold tracking-wider px-2 py-0.5 rounded-full bg-sky-500/10 text-sky-400 border border-sky-500/20">PWA</span>
+          </h1>
+          <p class="text-xs text-slate-400">Balance, gasolina, deudas y diagnóstico en tiempo real</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button id="exportBtn" title="Exportar Respaldo" class="px-3 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-xs font-medium text-slate-300 border border-gray-700 transition flex items-center gap-1.5">
+          <i class="fa-solid fa-download"></i> <span class="hidden sm:inline">Exportar</span>
+        </button>
+        <label for="importFile" title="Importar Respaldo" class="cursor-pointer px-3 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-xs font-medium text-slate-300 border border-gray-700 transition flex items-center gap-1.5">
+          <i class="fa-solid fa-upload"></i> <span class="hidden sm:inline">Importar</span>
+        </label>
+        <input type="file" id="importFile" class="hidden" accept=".json">
+      </div>
+    </div>
+  </header>
 
-            <div class="grid-2">
-              <div>
-                <label>Monto a Pagar</label>
-                <div class="input-wrap">
-                  <span class="prefix">$</span>
-                  <input type="number" value="${d.monto}" placeholder="0.00" step="any" oninput="actualizarDeuda(${d.id}, 'monto', this.value)">
-                </div>
-              </div>
-              <div>
-                <label>Fecha de Pago (Día y Mes)</label>
-                <input type="date" value="${d.fecha || ''}" onchange="actualizarDeuda(${d.id}, 'fecha', this.value)">
-              </div>
-            </div>
+  <!-- CONTENEDOR PRINCIPAL -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 space-y-6">
 
-            <div class="btn-group">
-              <button type="button" class="btn-pill ${d.modo === 'auto' ? 'active' : ''}" onclick="actualizarDeuda(${d.id}, 'modo', 'auto')">Por fecha</button>
-              <button type="button" class="btn-pill ${d.modo === 'q1' ? 'active' : ''}" onclick="actualizarDeuda(${d.id}, 'modo', 'q1')">1ª Qna</button>
-              <button type="button" class="btn-pill ${d.modo === 'q2' ? 'active' : ''}" onclick="actualizarDeuda(${d.id}, 'modo', 'q2')">2ª Qna</button>
-              <button type="button" class="btn-pill ${d.modo === 'dividir' ? 'active' : ''}" onclick="actualizarDeuda(${d.id}, 'modo', 'dividir')">50/50</button>
+    <!-- SECCIÓN 1: CONFIGURACIÓN DE QUINCENAS -->
+    <section class="bg-gray-900/90 border border-gray-800 rounded-2xl p-5 shadow-xl">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+        <div>
+          <h2 class="text-base font-semibold text-white flex items-center gap-2">
+            <i class="fa-solid fa-money-bill-wave text-emerald-400"></i> Ingresos Quincenales
+          </h2>
+          <p class="text-xs text-slate-400">Define los ingresos estimados para cada quincena del mes</p>
+        </div>
+        <div class="text-right w-full sm:w-auto flex justify-between sm:block border-t sm:border-0 border-gray-800 pt-2 sm:pt-0">
+          <span class="text-xs text-slate-400 block">Total Mensual Estimado:</span>
+          <span id="labelTotalIncome" class="text-lg font-bold text-emerald-400">$0.00</span>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="bg-gray-800/60 p-4 rounded-xl border border-gray-700/60 flex items-center gap-3">
+          <div class="p-3 bg-sky-500/10 text-sky-400 rounded-lg">
+            <i class="fa-solid fa-calendar-days text-lg"></i>
+          </div>
+          <div class="flex-1">
+            <label class="block text-xs font-medium text-slate-300 mb-1">1ra Quincena (Días 1 - 15)</label>
+            <div class="relative">
+              <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 text-sm">$</span>
+              <input type="number" id="inputQ1" min="0" step="0.01" placeholder="0.00" class="w-full pl-7 pr-3 py-1.5 bg-gray-900 border border-gray-700 rounded-lg text-sm text-white focus:outline-none focus:border-sky-500 font-semibold tracking-wide transition">
             </div>
           </div>
+        </div>
+
+        <div class="bg-gray-800/60 p-4 rounded-xl border border-gray-700/60 flex items-center gap-3">
+          <div class="p-3 bg-purple-500/10 text-purple-400 rounded-lg">
+            <i class="fa-solid fa-calendar-check text-lg"></i>
+          </div>
+          <div class="flex-1">
+            <label class="block text-xs font-medium text-slate-300 mb-1">2da Quincena (Día 16 - Fin de mes)</label>
+            <div class="relative">
+              <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 text-sm">$</span>
+              <input type="number" id="inputQ2" min="0" step="0.01" placeholder="0.00" class="w-full pl-7 pr-3 py-1.5 bg-gray-900 border border-gray-700 rounded-lg text-sm text-white focus:outline-none focus:border-purple-500 font-semibold tracking-wide transition">
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECCIÓN 2: FORMULARIO DE GASTOS / DEUDAS / GASOLINA -->
+    <section class="bg-gray-900/90 border border-gray-800 rounded-2xl p-5 shadow-xl">
+      <h2 class="text-base font-semibold text-white mb-1 flex items-center gap-2">
+        <i class="fa-solid fa-circle-plus text-sky-400"></i> Registrar Cargo o Compromiso
+      </h2>
+      <p class="text-xs text-slate-400 mb-4">Captura gastos del día a día, cargas de gasolina o cuotas de deudas.</p>
+
+      <form id="expenseForm" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
+        <!-- Concepto -->
+        <div class="lg:col-span-2">
+          <label class="block text-xs font-medium text-slate-300 mb-1">Concepto / Descripción</label>
+          <input type="text" id="expDesc" required placeholder="Ej. Gasolina magna, Tarjeta BBVA, Despensa..." class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-sm text-white focus:outline-none focus:border-sky-500">
+        </div>
+
+        <!-- Monto -->
+        <div>
+          <label class="block text-xs font-medium text-slate-300 mb-1">Monto ($)</label>
+          <input type="number" id="expAmount" required min="0.01" step="0.01" placeholder="0.00" class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-sm text-white focus:outline-none focus:border-sky-500">
+        </div>
+
+        <!-- Fecha -->
+        <div>
+          <label class="block text-xs font-medium text-slate-300 mb-1">Fecha de pago / cargo</label>
+          <input type="date" id="expDate" required class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-sm text-white focus:outline-none focus:border-sky-500">
+        </div>
+
+        <!-- Categoría -->
+        <div>
+          <label class="block text-xs font-medium text-slate-300 mb-1">Categoría</label>
+          <select id="expCategory" class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-sm text-white focus:outline-none focus:border-sky-500">
+            <option value="gasolina">⛽ Gasolina / Combustible</option>
+            <option value="deuda">💳 Tarjeta / Crédito / Deuda</option>
+            <option value="servicios">💡 Servicios (Luz, Agua, Internet)</option>
+            <option value="alimentacion">🛒 Despensa y Alimentos</option>
+            <option value="auto">🚗 Auto y Mantenimiento</option>
+            <option value="hogar">🏠 Renta / Hogar</option>
+            <option value="otros">📦 Otros Gastos</option>
+          </select>
+        </div>
+
+        <!-- Naturaleza (Gasto vs Deuda) -->
+        <div>
+          <label class="block text-xs font-medium text-slate-300 mb-1">Tipo de compromiso</label>
+          <select id="expType" class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-sm text-white focus:outline-none focus:border-sky-500">
+            <option value="gasto">Gasto Corriente</option>
+            <option value="deuda">Deuda / Amortización</option>
+          </select>
+        </div>
+
+        <!-- Distribución Quincenal -->
+        <div class="sm:col-span-2 lg:col-span-4">
+          <label class="block text-xs font-medium text-slate-300 mb-1">Asignación de Pago en Quincena</label>
+          <div class="grid grid-cols-3 gap-2">
+            <label class="flex items-center justify-center gap-2 p-2 bg-gray-800 border border-gray-700 rounded-lg cursor-pointer hover:bg-gray-750 text-xs">
+              <input type="radio" name="paymentSplit" value="auto" checked class="text-sky-500 focus:ring-0">
+              <span>Por Fecha (Auto)</span>
+            </label>
+            <label class="flex items-center justify-center gap-2 p-2 bg-gray-800 border border-gray-700 rounded-lg cursor-pointer hover:bg-gray-750 text-xs">
+              <input type="radio" name="paymentSplit" value="split" class="text-emerald-500 focus:ring-0">
+              <span class="text-emerald-400 font-medium">50% / 50% (Mitad y Mitad)</span>
+            </label>
+            <label class="flex items-center justify-center gap-2 p-2 bg-gray-800 border border-gray-700 rounded-lg cursor-pointer hover:bg-gray-750 text-xs">
+              <input type="radio" name="paymentSplit" value="forced_q1" class="text-sky-400 focus:ring-0">
+              <span>Todo en 1ra Qna</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Botón Registrar -->
+        <div class="sm:col-span-2 lg:col-span-2 flex items-end">
+          <button type="submit" class="w-full py-2 px-4 bg-sky-600 hover:bg-sky-500 text-white rounded-lg text-sm font-semibold flex items-center justify-center gap-2 shadow-lg shadow-sky-600/30 transition">
+            <i class="fa-solid fa-plus"></i> Registrar en Plan
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <!-- SECCIÓN 3: DIAGNÓSTICO FINANCIERO INTELIGENTE -->
+    <section class="bg-gradient-to-r from-gray-900 via-gray-900 to-[#10192d] border border-sky-900/40 rounded-2xl p-5 shadow-xl">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h2 class="text-base font-semibold text-white flex items-center gap-2">
+            <i class="fa-solid fa-brain text-sky-400"></i> Diagnóstico y Recomendación de Rebalanceo
+          </h2>
+          <p class="text-xs text-slate-400">Análisis dinámico de liquidez, solvencia y flujo quincenal</p>
+        </div>
+        <span id="healthBadge" class="px-2.5 py-1 text-xs font-semibold rounded-full bg-gray-800 text-gray-400 border border-gray-700">Sin datos</span>
+      </div>
+
+      <!-- Tarjetas de Quincena y Balance -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+        <!-- 1ra Quincena -->
+        <div class="bg-gray-800/60 p-4 rounded-xl border border-gray-700">
+          <div class="flex justify-between items-center mb-1">
+            <span class="text-xs font-semibold uppercase text-sky-400 tracking-wider">1ra Quincena (1 al 15)</span>
+            <span id="q1Status" class="text-[10px] px-2 py-0.5 rounded font-bold">--</span>
+          </div>
+          <div class="space-y-1 mt-2 text-xs">
+            <div class="flex justify-between text-slate-400">
+              <span>Ingreso:</span>
+              <span id="diagQ1Income" class="font-medium text-white">$0.00</span>
+            </div>
+            <div class="flex justify-between text-slate-400">
+              <span>Compromisos:</span>
+              <span id="diagQ1Expenses" class="font-medium text-rose-400">$0.00</span>
+            </div>
+            <div class="flex justify-between pt-1 border-t border-gray-700 text-sm font-bold">
+              <span>Remanente:</span>
+              <span id="diagQ1Net">$0.00</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2da Quincena -->
+        <div class="bg-gray-800/60 p-4 rounded-xl border border-gray-700">
+          <div class="flex justify-between items-center mb-1">
+            <span class="text-xs font-semibold uppercase text-purple-400 tracking-wider">2da Quincena (16 al Fin)</span>
+            <span id="q2Status" class="text-[10px] px-2 py-0.5 rounded font-bold">--</span>
+          </div>
+          <div class="space-y-1 mt-2 text-xs">
+            <div class="flex justify-between text-slate-400">
+              <span>Ingreso:</span>
+              <span id="diagQ2Income" class="font-medium text-white">$0.00</span>
+            </div>
+            <div class="flex justify-between text-slate-400">
+              <span>Compromisos:</span>
+              <span id="diagQ2Expenses" class="font-medium text-rose-400">$0.00</span>
+            </div>
+            <div class="flex justify-between pt-1 border-t border-gray-700 text-sm font-bold">
+              <span>Remanente:</span>
+              <span id="diagQ2Net">$0.00</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Balance Mensual Consolidado -->
+        <div class="bg-gray-800/60 p-4 rounded-xl border border-gray-700">
+          <div class="flex justify-between items-center mb-1">
+            <span class="text-xs font-semibold uppercase text-emerald-400 tracking-wider">Flujo Neto Mensual</span>
+            <span id="overallTag" class="text-[10px] px-2 py-0.5 rounded font-bold">--</span>
+          </div>
+          <div class="space-y-1 mt-2 text-xs">
+            <div class="flex justify-between text-slate-400">
+              <span>Ingreso Total:</span>
+              <span id="diagMonthIncome" class="font-medium text-white">$0.00</span>
+            </div>
+            <div class="flex justify-between text-slate-400">
+              <span>Gastos + Deudas:</span>
+              <span id="diagMonthExpenses" class="font-medium text-rose-400">$0.00</span>
+            </div>
+            <div class="flex justify-between pt-1 border-t border-gray-700 text-sm font-bold">
+              <span>Ahorro Proyectado:</span>
+              <span id="diagMonthNet">$0.00</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Métricas Clave (Gasolina & Endeudamiento) -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+        <!-- Tarjeta Gasolina -->
+        <div class="bg-gray-800/40 p-3 rounded-xl border border-amber-500/20 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="p-2.5 bg-amber-500/10 text-amber-400 rounded-lg">
+              <i class="fa-solid fa-gas-pump text-base"></i>
+            </div>
+            <div>
+              <p class="text-xs text-slate-400">Gasto en Gasolina</p>
+              <h4 id="metricGasTotal" class="text-sm font-bold text-white">$0.00</h4>
+            </div>
+          </div>
+          <div class="text-right">
+            <span id="metricGasPercent" class="text-xs font-bold text-amber-400">0%</span>
+            <span class="block text-[10px] text-slate-500">del ingreso total</span>
+          </div>
+        </div>
+
+        <!-- Tarjeta Deudas -->
+        <div class="bg-gray-800/40 p-3 rounded-xl border border-rose-500/20 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="p-2.5 bg-rose-500/10 text-rose-400 rounded-lg">
+              <i class="fa-solid fa-credit-card text-base"></i>
+            </div>
+            <div>
+              <p class="text-xs text-slate-400">Pago de Deudas / Créditos</p>
+              <h4 id="metricDebtTotal" class="text-sm font-bold text-white">$0.00</h4>
+            </div>
+          </div>
+          <div class="text-right">
+            <span id="metricDebtPercent" class="text-xs font-bold text-rose-400">0%</span>
+            <span class="block text-[10px] text-slate-500">ratio endeudamiento</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Caja de Recomendaciones y Dictamen -->
+      <div class="bg-gray-950/70 border border-gray-800 p-4 rounded-xl">
+        <h3 class="text-xs font-bold uppercase tracking-wider text-sky-400 mb-2 flex items-center gap-1.5">
+          <i class="fa-solid fa-lightbulb"></i> Recomendaciones Estratégicas para tu Dinero
+        </h3>
+        <ul id="recommendationList" class="space-y-2 text-xs text-slate-300">
+          <li class="flex items-start gap-2">
+            <i class="fa-solid fa-circle-info text-sky-400 mt-0.5"></i>
+            <span>Ingresa tus quincenas y tus compromisos para generar la hoja de ruta financiera.</span>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- SECCIÓN 4: LISTA DETALLADA Y GRÁFICAS -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      
+      <!-- Lista de Gastos y Deudas (2 columnas) -->
+      <div class="lg:col-span-2 bg-gray-900/90 border border-gray-800 rounded-2xl p-5 shadow-xl">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-4">
+          <div>
+            <h2 class="text-base font-semibold text-white flex items-center gap-2">
+              <i class="fa-solid fa-list-check text-sky-400"></i> Registro de Pagos Asignados
+            </h2>
+            <p class="text-xs text-slate-400">Visualiza en qué quincena impacta cada compromiso</p>
+          </div>
+          <div class="flex items-center gap-2 w-full sm:w-auto">
+            <select id="filterCategory" class="px-2.5 py-1 bg-gray-800 border border-gray-700 text-xs rounded-lg text-slate-300 focus:outline-none">
+              <option value="all">Todas las categorías</option>
+              <option value="gasolina">Gasolina</option>
+              <option value="deuda">Deudas</option>
+              <option value="split">Divididos (50/50)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto custom-scroll">
+          <table class="w-full text-left text-xs">
+            <thead class="text-[11px] uppercase tracking-wider text-slate-400 bg-gray-800/70 border-b border-gray-700">
+              <tr>
+                <th class="py-2.5 px-3">Fecha</th>
+                <th class="py-2.5 px-3">Concepto</th>
+                <th class="py-2.5 px-3">Tipo / Cat.</th>
+                <th class="py-2.5 px-3">Asignación</th>
+                <th class="py-2.5 px-3 text-right">Monto</th>
+                <th class="py-2.5 px-3 text-center">Acción</th>
+              </tr>
+            </thead>
+            <tbody id="expenseTableBody" class="divide-y divide-gray-800 text-slate-300">
+              <tr>
+                <td colspan="6" class="py-8 text-center text-slate-500">No hay movimientos registrados aún.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Gráficos Visuales (1 columna) -->
+      <div class="space-y-6">
+        <!-- Gráfica de Distribución por Categoría -->
+        <div class="bg-gray-900/90 border border-gray-800 rounded-2xl p-5 shadow-xl">
+          <h3 class="text-sm font-semibold text-white mb-2 flex items-center gap-2">
+            <i class="fa-solid fa-chart-pie text-emerald-400"></i> Gastos por Categoría
+          </h3>
+          <div class="relative h-56 flex items-center justify-center">
+            <canvas id="categoryChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Gráfica Comparativa Quincenal -->
+        <div class="bg-gray-900/90 border border-gray-800 rounded-2xl p-5 shadow-xl">
+          <h3 class="text-sm font-semibold text-white mb-2 flex items-center gap-2">
+            <i class="fa-solid fa-chart-column text-sky-400"></i> Ingresos vs Egresos Quincenales
+          </h3>
+          <div class="relative h-56 flex items-center justify-center">
+            <canvas id="quincenaBarChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- LÓGICA JAVASCRIPT Y REGISTRO DE SERVICE WORKER -->
+  <script>
+    // ESTADO DE LA APLICACIÓN
+    const AppState = {
+      incomes: {
+        q1: 0,
+        q2: 0
+      },
+      expenses: []
+    };
+
+    // FORMATEADORES
+    const formatCurrency = (val) => {
+      return new Intl.NumberFormat('es-MX', {
+        style: 'currency',
+        currency: 'MXN'
+      }).format(val || 0);
+    };
+
+    // CATEGORÍAS Y ETIQUETAS
+    const CATEGORIES = {
+      gasolina: { name: 'Gasolina', icon: 'fa-gas-pump', color: '#f59e0b' },
+      deuda: { name: 'Deuda / Crédito', icon: 'fa-credit-card', color: '#f43f5e' },
+      servicios: { name: 'Servicios', icon: 'fa-lightbulb', color: '#38bdf8' },
+      alimentacion: { name: 'Alimentos', icon: 'fa-cart-shopping', color: '#10b981' },
+      auto: { name: 'Auto', icon: 'fa-car', color: '#8b5cf6' },
+      hogar: { name: 'Hogar', icon: 'fa-house', color: '#ec4899' },
+      otros: { name: 'Otros', icon: 'fa-box', color: '#64748b' }
+    };
+
+    // INSTANCIAS DE GRÁFICAS
+    let categoryChartInstance = null;
+    let quincenaBarChartInstance = null;
+
+    // INICIALIZACIÓN
+    document.addEventListener('DOMContentLoaded', () => {
+      // Fecha por defecto en el formulario (hoy)
+      document.getElementById('expDate').valueAsDate = new Date();
+
+      loadFromStorage();
+      bindEvents();
+      initCharts();
+      renderAll();
+      registerServiceWorker();
+    });
+
+    // REGISTRO SERVICE WORKER (PWA)
+    function registerServiceWorker() {
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('./sw.js')
+            .then(reg => console.log('Service Worker registrado con éxito:', reg.scope))
+            .catch(err => console.error('Error al registrar el Service Worker:', err));
+        });
+      }
+    }
+
+    // PERSISTENCIA LOCAL STORAGE
+    function saveToStorage() {
+      localStorage.setItem('finanzas_qna_data', JSON.stringify(AppState));
+    }
+
+    function loadFromStorage() {
+      const data = localStorage.getItem('finanzas_qna_data');
+      if (data) {
+        try {
+          const parsed = JSON.parse(data);
+          AppState.incomes = parsed.incomes || { q1: 0, q2: 0 };
+          AppState.expenses = parsed.expenses || [];
+
+          document.getElementById('inputQ1').value = AppState.incomes.q1 || '';
+          document.getElementById('inputQ2').value = AppState.incomes.q2 || '';
+        } catch (e) {
+          console.error("Error al cargar datos:", e);
+        }
+      }
+    }
+
+    // EVENTOS
+    function bindEvents() {
+      // Inputs de quincenas
+      document.getElementById('inputQ1').addEventListener('input', (e) => {
+        AppState.incomes.q1 = parseFloat(e.target.value) || 0;
+        saveToStorage();
+        renderAll();
+      });
+
+      document.getElementById('inputQ2').addEventListener('input', (e) => {
+        AppState.incomes.q2 = parseFloat(e.target.value) || 0;
+        saveToStorage();
+        renderAll();
+      });
+
+      // Formulario de gastos
+      document.getElementById('expenseForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        addExpense();
+      });
+
+      // Filtro de tabla
+      document.getElementById('filterCategory').addEventListener('change', renderTable);
+
+      // Exportar JSON
+      document.getElementById('exportBtn').addEventListener('click', () => {
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(AppState, null, 2));
+        const dlAnchorElem = document.createElement('a');
+        dlAnchorElem.setAttribute("href", dataStr);
+        dlAnchorElem.setAttribute("download", `finanzas_backup_${new Date().toISOString().slice(0, 10)}.json`);
+        dlAnchorElem.click();
+      });
+
+      // Importar JSON
+      document.getElementById('importFile').addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          try {
+            const parsed = JSON.parse(event.target.result);
+            if (parsed.incomes && parsed.expenses) {
+              AppState.incomes = parsed.incomes;
+              AppState.expenses = parsed.expenses;
+              document.getElementById('inputQ1').value = AppState.incomes.q1 || '';
+              document.getElementById('inputQ2').value = AppState.incomes.q2 || '';
+              saveToStorage();
+              renderAll();
+              alert("¡Datos cargados correctamente!");
+            }
+          } catch (err) {
+            alert("El archivo no tiene el formato válido.");
+          }
+        };
+        reader.readAsText(file);
+      });
+    }
+
+    // AÑADIR GASTO / DEUDA
+    function addExpense() {
+      const desc = document.getElementById('expDesc').value.trim();
+      const amount = parseFloat(document.getElementById('expAmount').value) || 0;
+      const date = document.getElementById('expDate').value;
+      const category = document.getElementById('expCategory').value;
+      const type = document.getElementById('expType').value;
+      const splitMode = document.querySelector('input[name="paymentSplit"]:checked').value;
+
+      if (!desc || amount <= 0 || !date) return;
+
+      const newExpense = {
+        id: Date.now().toString(),
+        desc,
+        amount,
+        date,
+        category,
+        type,
+        splitMode
+      };
+
+      AppState.expenses.push(newExpense);
+      saveToStorage();
+      renderAll();
+
+      // Reset campos principales
+      document.getElementById('expDesc').value = '';
+      document.getElementById('expAmount').value = '';
+      document.getElementById('expDesc').focus();
+    }
+
+    // ELIMINAR GASTO
+    window.deleteExpense = function(id) {
+      AppState.expenses = AppState.expenses.filter(item => item.id !== id);
+      saveToStorage();
+      renderAll();
+    };
+
+    // DETERMINAR ASIGNACIÓN DE QUINCENA
+    function calculateAssignedQuincena(expense) {
+      if (expense.splitMode === 'split') {
+        return {
+          q1: expense.amount / 2,
+          q2: expense.amount / 2,
+          label: '50% Q1 / 50% Q2',
+          isSplit: true
+        };
+      }
+      if (expense.splitMode === 'forced_q1') {
+        return { q1: expense.amount, q2: 0, label: 'Forzado 1ra Qna', isSplit: false };
+      }
+
+      // Por defecto 'auto': según el día de la fecha seleccionada
+      const day = parseInt(expense.date.split('-')[2], 10);
+      if (day <= 15) {
+        return { q1: expense.amount, q2: 0, label: '1ra Qna (Día ' + day + ')', isSplit: false };
+      } else {
+        return { q1: 0, q2: expense.amount, label: '2da Qna (Día ' + day + ')', isSplit: false };
+      }
+    }
+
+    // RENDERIZADO GLOBAL
+    function renderAll() {
+      renderFinancialSummary();
+      renderTable();
+      updateCharts();
+    }
+
+    // DIAGNÓSTICO FINANCIERO Y CÁLCULOS
+    function renderFinancialSummary() {
+      const q1Income = AppState.incomes.q1;
+      const q2Income = AppState.incomes.q2;
+      const totalIncome = q1Income + q2Income;
+
+      document.getElementById('labelTotalIncome').textContent = formatCurrency(totalIncome);
+
+      let q1ExpenseTotal = 0;
+      let q2ExpenseTotal = 0;
+      let totalGas = 0;
+      let totalDebt = 0;
+
+      AppState.expenses.forEach(exp => {
+        const assignment = calculateAssignedQuincena(exp);
+        q1ExpenseTotal += assignment.q1;
+        q2ExpenseTotal += assignment.q2;
+
+        if (exp.category === 'gasolina') {
+          totalGas += exp.amount;
+        }
+        if (exp.type === 'deuda' || exp.category === 'deuda') {
+          totalDebt += exp.amount;
+        }
+      });
+
+      const q1Net = q1Income - q1ExpenseTotal;
+      const q2Net = q2Income - q2ExpenseTotal;
+      const totalExpense = q1ExpenseTotal + q2ExpenseTotal;
+      const monthNet = totalIncome - totalExpense;
+
+      // Actualizar tarjeta Q1
+      document.getElementById('diagQ1Income').textContent = formatCurrency(q1Income);
+      document.getElementById('diagQ1Expenses').textContent = formatCurrency(q1ExpenseTotal);
+      const q1NetElem = document.getElementById('diagQ1Net');
+      q1NetElem.textContent = formatCurrency(q1Net);
+      q1NetElem.className = `text-sm font-bold ${q1Net >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
+      
+      const q1Status = document.getElementById('q1Status');
+      if (q1Income === 0 && q1ExpenseTotal === 0) {
+        q1Status.textContent = 'Sin datos';
+        q1Status.className = 'text-[10px] px-2 py-0.5 rounded font-bold bg-gray-700 text-slate-300';
+      } else if (q1Net >= 0) {
+        q1Status.textContent = 'Holgada';
+        q1Status.className = 'text-[10px] px-2 py-0.5 rounded font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
+      } else {
+        q1Status.textContent = 'Déficit';
+        q1Status.className = 'text-[10px] px-2 py-0.5 rounded font-bold bg-rose-500/20 text-rose-400 border border-rose-500/30';
+      }
+
+      // Actualizar tarjeta Q2
+      document.getElementById('diagQ2Income').textContent = formatCurrency(q2Income);
+      document.getElementById('diagQ2Expenses').textContent = formatCurrency(q2ExpenseTotal);
+      const q2NetElem = document.getElementById('diagQ2Net');
+      q2NetElem.textContent = formatCurrency(q2Net);
+      q2NetElem.className = `text-sm font-bold ${q2Net >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
+
+      const q2Status = document.getElementById('q2Status');
+      if (q2Income === 0 && q2ExpenseTotal === 0) {
+        q2Status.textContent = 'Sin datos';
+        q2Status.className = 'text-[10px] px-2 py-0.5 rounded font-bold bg-gray-700 text-slate-300';
+      } else if (q2Net >= 0) {
+        q2Status.textContent = 'Holgada';
+        q2Status.className = 'text-[10px] px-2 py-0.5 rounded font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
+      } else {
+        q2Status.textContent = 'Déficit';
+        q2Status.className = 'text-[10px] px-2 py-0.5 rounded font-bold bg-rose-500/20 text-rose-400 border border-rose-500/30';
+      }
+
+      // Actualizar Consolidado
+      document.getElementById('diagMonthIncome').textContent = formatCurrency(totalIncome);
+      document.getElementById('diagMonthExpenses').textContent = formatCurrency(totalExpense);
+      const monthNetElem = document.getElementById('diagMonthNet');
+      monthNetElem.textContent = formatCurrency(monthNet);
+      monthNetElem.className = `text-sm font-bold ${monthNet >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
+
+      const overallTag = document.getElementById('overallTag');
+      if (monthNet >= 0) {
+        overallTag.textContent = 'Superávit';
+        overallTag.className = 'text-[10px] px-2 py-0.5 rounded font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
+      } else {
+        overallTag.textContent = 'En Rojo';
+        overallTag.className = 'text-[10px] px-2 py-0.5 rounded font-bold bg-rose-500/20 text-rose-400 border border-rose-500/30';
+      }
+
+      // Métricas de Gasolina y Deuda
+      document.getElementById('metricGasTotal').textContent = formatCurrency(totalGas);
+      const gasRatio = totalIncome > 0 ? (totalGas / totalIncome) * 100 : 0;
+      document.getElementById('metricGasPercent').textContent = gasRatio.toFixed(1) + '%';
+
+      document.getElementById('metricDebtTotal').textContent = formatCurrency(totalDebt);
+      const debtRatio = totalIncome > 0 ? (totalDebt / totalIncome) * 100 : 0;
+      const debtElem = document.getElementById('metricDebtPercent');
+      debtElem.textContent = debtRatio.toFixed(1) + '%';
+      if (debtRatio > 35) {
+        debtElem.className = 'text-xs font-bold text-rose-400';
+      } else {
+        debtElem.className = 'text-xs font-bold text-emerald-400';
+      }
+
+      // DIAGNÓSTICO Y RECOMENDACIONES
+      generateDiagnosis(q1Income, q2Income, q1ExpenseTotal, q2ExpenseTotal, q1Net, q2Net, monthNet, gasRatio, debtRatio, totalIncome);
+    }
+
+    // MOTOR DE RECOMENDACIONES INTELIGENTES
+    function generateDiagnosis(q1In, q2In, q1Exp, q2Exp, q1Net, q2Net, monthNet, gasRatio, debtRatio, totalIncome) {
+      const recList = document.getElementById('recommendationList');
+      const badge = document.getElementById('healthBadge');
+      recList.innerHTML = '';
+
+      if (totalIncome === 0 && AppState.expenses.length === 0) {
+        badge.textContent = 'Sin datos';
+        badge.className = 'px-2.5 py-1 text-xs font-semibold rounded-full bg-gray-800 text-gray-400 border border-gray-700';
+        recList.innerHTML = `<li class="flex items-center gap-2 text-slate-400"><i class="fa-solid fa-circle-info text-sky-400"></i> Ingresa tus quincenas e ítems para activar el diagnóstico.</li>`;
+        return;
+      }
+
+      const recs = [];
+
+      // Evaluación del Desbalance Quincenal (Problema de liquidez temporal)
+      if (q1Net < 0 && q2Net > 0 && monthNet >= 0) {
+        recs.push({
+          icon: 'fa-triangle-exclamation text-amber-400',
+          text: `<b>Desbalance en 1ra Quincena:</b> Tienes un déficit de ${formatCurrency(Math.abs(q1Net))} en los primeros 15 días, pero te sobra en la segunda. <i>Solución:</i> Cambia los pagos marcados como fijos de la 1ra quincena a la opción <b>"50% / 50%"</b> o negocia las fechas límite de tarjetas para después del día 16.`
+        });
+      } else if (q2Net < 0 && q1Net > 0 && monthNet >= 0) {
+        recs.push({
+          icon: 'fa-triangle-exclamation text-amber-400',
+          text: `<b>Desbalance en 2da Quincena:</b> Tu segunda quincena queda corta por ${formatCurrency(Math.abs(q2Net))}. <i>Solución:</i> Pasa gastos opcionales o adelanta compras de despensa en la 1ra quincena donde dispones de holgura (${formatCurrency(q1Net)}).`
+        });
+      }
+
+      // Evaluación de Deudas (Regla del 30-35% de CONDUSEF)
+      if (debtRatio > 35) {
+        recs.push({
+          icon: 'fa-skull-crossbones text-rose-500',
+          text: `<b>Alerta Crítica de Endeudamiento:</b> Tus cuotas de deuda consumen el <b>${debtRatio.toFixed(1)}%</b> de tus ingresos (el límite sano sugerido es 30%-35%). Detén compras a meses sin intereses y aplica la estrategia de bola de nieve sobre la deuda más pequeña.`
+        });
+      } else if (debtRatio > 0) {
+        recs.push({
+          icon: 'fa-check text-emerald-400',
+          text: `<b>Ratio de endeudamiento controlado:</b> Tus deudas representan el ${debtRatio.toFixed(1)}%, dentro de un rango manejable.`
+        });
+      }
+
+      // Evaluación de Gasolina y Movilidad
+      if (gasRatio > 15) {
+        recs.push({
+          icon: 'fa-gas-pump text-amber-400',
+          text: `<b>Gasto elevado en Gasolina:</b> Representa el <b>${gasRatio.toFixed(1)}%</b> de tu presupuesto. Considera planificar rutas de traslados, revisar la presión adecuada de neumáticos o alternar traslados.`
+        });
+      }
+
+      // Situación Global de Solvencia
+      if (monthNet < 0) {
+        badge.textContent = 'En Riesgo Financiero';
+        badge.className = 'px-2.5 py-1 text-xs font-semibold rounded-full bg-rose-500/20 text-rose-400 border border-rose-500/30';
+        recs.unshift({
+          icon: 'fa-triangle-exclamation text-rose-400',
+          text: `<b>Déficit Total de ${formatCurrency(Math.abs(monthNet))}:</b> Tus compromisos superan los ingresos mensuales totales. Urge recortar gastos prescindibles o reprogramar deudas.`
+        });
+      } else {
+        const ahorroRatio = totalIncome > 0 ? (monthNet / totalIncome) * 100 : 0;
+        if (ahorroRatio >= 20) {
+          badge.textContent = 'Salud Excelente (Superávit > 20%)';
+          badge.className = 'px-2.5 py-1 text-xs font-semibold rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
+          recs.push({
+            icon: 'fa-piggy-bank text-emerald-400',
+            text: `<b>Capacidad de Ahorro/Inversión:</b> Te quedan libres ${formatCurrency(monthNet)} (${ahorroRatio.toFixed(1)}%). Ideal para fortalecer tu fondo de emergencia o CETES/inversión.`
+          });
+        } else {
+          badge.textContent = 'Equilibrado / Margen Justo';
+          badge.className = 'px-2.5 py-1 text-xs font-semibold rounded-full bg-sky-500/20 text-sky-400 border border-sky-500/30';
+          recs.push({
+            icon: 'fa-shield-halved text-sky-400',
+            text: `Tu flujo mensual es positivo con un margen de ${formatCurrency(monthNet)}, pero el colchón es ajustado. Evita nuevos compromisos a plazo.`
+          });
+        }
+      }
+
+      // Inyectar en el DOM
+      recs.forEach(r => {
+        const li = document.createElement('li');
+        li.className = 'flex items-start gap-2.5';
+        li.innerHTML = `<i class="fa-solid ${r.icon} mt-0.5 text-sm"></i><div>${r.text}</div>`;
+        recList.appendChild(li);
+      });
+    }
+
+    // RENDERIZADO DE TABLA
+    function renderTable() {
+      const tbody = document.getElementById('expenseTableBody');
+      const filter = document.getElementById('filterCategory').value;
+
+      let filtered = [...AppState.expenses];
+      if (filter === 'gasolina') filtered = filtered.filter(x => x.category === 'gasolina');
+      if (filter === 'deuda') filtered = filtered.filter(x => x.type === 'deuda' || x.category === 'deuda');
+      if (filter === 'split') filtered = filtered.filter(x => x.splitMode === 'split');
+
+      // Ordenar por fecha descendente
+      filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-slate-500">No se encontraron movimientos registrados.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(item => {
+        const cat = CATEGORIES[item.category] || CATEGORIES.otros;
+        const assign = calculateAssignedQuincena(item);
+
+        let assignBadge = '';
+        if (assign.isSplit) {
+          assignBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">Mitad y Mitad ($${(item.amount / 2).toFixed(2)} c/u)</span>`;
+        } else if (assign.q1 > 0) {
+          assignBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-sky-500/10 text-sky-400 border border-sky-500/30">1ra Quincena</span>`;
+        } else {
+          assignBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-purple-500/10 text-purple-400 border border-purple-500/30">2da Quincena</span>`;
+        }
+
+        return `
+          <tr class="hover:bg-gray-800/40 transition">
+            <td class="py-3 px-3 text-slate-400 font-mono text-[11px]">${item.date}</td>
+            <td class="py-3 px-3 font-medium text-white">${item.desc}</td>
+            <td class="py-3 px-3">
+              <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px]" style="background-color: ${cat.color}15; color: ${cat.color}; border: 1px solid ${cat.color}30">
+                <i class="fa-solid ${cat.icon}"></i> ${cat.name}
+              </span>
+            </td>
+            <td class="py-3 px-3">${assignBadge}</td>
+            <td class="py-3 px-3 text-right font-bold text-white">${formatCurrency(item.amount)}</td>
+            <td class="py-3 px-3 text-center">
+              <button onclick="deleteExpense('${item.id}')" title="Eliminar" class="text-rose-400 hover:text-rose-300 p-1 rounded hover:bg-rose-500/10 transition">
+                <i class="fa-solid fa-trash-can"></i>
+              </button>
+            </td>
+          </tr>
         `;
       }).join('');
     }
 
-    function resolverGastoSimple(modo, monto) {
-      if (modo === 'quincenal') return { q1: monto, q2: monto };
-      if (modo === 'mensual') return { q1: monto / 2, q2: monto / 2 };
-      if (modo === 'q1') return { q1: monto, q2: 0 };
-      if (modo === 'q2') return { q1: 0, q2: monto };
-      return { q1: monto / 2, q2: monto / 2 };
-    }
-
-    function calcular() {
-      const q1Ingreso = parseFloat(document.getElementById('inp-q1').value) || 0;
-      const q2Ingreso = parseFloat(document.getElementById('inp-q2').value) || 0;
-      const creditoMonto = parseFloat(document.getElementById('inp-credito').value) || 0;
-
-      const casaMonto = parseFloat(document.getElementById('inp-casa').value) || 0;
-      const casaModo = document.getElementById('sel-casa-modo').value;
-
-      const gasMonto = parseFloat(document.getElementById('inp-gasolina').value) || 0;
-      const gasModo = document.getElementById('sel-gasolina-modo').value;
-
-      // Desglose Crédito Fijo
-      let credQ1 = 0, credQ2 = 0;
-      if (creditoModo === 'dividir') { credQ1 = creditoMonto / 2; credQ2 = creditoMonto / 2; }
-      else if (creditoModo === 'q1') { credQ1 = creditoMonto; }
-      else { credQ2 = creditoMonto; }
-
-      // Desglose Dinámico de Deudas (TCs, Mercado Libre, Amazon, etc.)
-      let deudasQ1 = 0;
-      let deudasQ2 = 0;
-      let desgloseConsejos = [];
-
-      deudas.forEach(d => {
-        const m = parseFloat(d.monto) || 0;
-        const asig = resolverAsignacionDeuda(d);
-        const parteQ1 = m * asig.q1;
-        const parteQ2 = m * asig.q2;
-        deudasQ1 += parteQ1;
-        deudasQ2 += parteQ2;
-
-        if (m > 0) {
-          desgloseConsejos.push({
-            nombre: d.nombre || 'Deuda sin nombre',
-            monto: m,
-            label: asig.label
-          });
+    // INICIALIZACIÓN DE GRÁFICAS (CHART.JS)
+    function initCharts() {
+      // 1. Gráfica de Donut por Categorías
+      const ctxCat = document.getElementById('categoryChart').getContext('2d');
+      categoryChartInstance = new Chart(ctxCat, {
+        type: 'doughnut',
+        data: {
+          labels: [],
+          datasets: [{
+            data: [],
+            backgroundColor: [
+              '#f59e0b', '#f43f5e', '#38bdf8', '#10b981', '#8b5cf6', '#ec4899', '#64748b'
+            ],
+            borderWidth: 2,
+            borderColor: '#111827'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'right',
+              labels: { boxWidth: 10, color: '#94a3b8', font: { size: 10 } }
+            }
+          },
+          cutout: '70%'
         }
       });
 
-      // Casa y Gasolina
-      const distCasa = resolverGastoSimple(casaModo, casaMonto);
-      const distGas = resolverGastoSimple(gasModo, gasMonto);
-
-      const gastosQ1 = credQ1 + deudasQ1 + distCasa.q1 + distGas.q1;
-      const libreQ1 = q1Ingreso - gastosQ1;
-
-      const gastosQ2 = credQ2 + deudasQ2 + distCasa.q2 + distGas.q2;
-      const libreQ2 = q2Ingreso - gastosQ2;
-
-      const gastosMes = gastosQ1 + gastosQ2;
-      const totalMesLibre = (q1Ingreso + q2Ingreso) - gastosMes;
-
-      // Mostrar Resultados
-      document.getElementById('disp-q1-gasto').innerText = fmt(gastosQ1);
-      const elemQ1 = document.getElementById('disp-q1-libre');
-      elemQ1.innerText = fmt(libreQ1);
-      elemQ1.className = libreQ1 >= 0 ? 'kpi-value' : 'kpi-value danger';
-
-      document.getElementById('disp-q2-gasto').innerText = fmt(gastosQ2);
-      const elemQ2 = document.getElementById('disp-q2-libre');
-      elemQ2.innerText = fmt(libreQ2);
-      elemQ2.className = libreQ2 >= 0 ? 'kpi-value' : 'kpi-value danger';
-
-      document.getElementById('disp-gastos-mes').innerText = fmt(gastosMes);
-      const elemTotal = document.getElementById('disp-total-mes');
-      elemTotal.innerText = fmt(totalMesLibre);
-      elemTotal.style.color = totalMesLibre >= 0 ? '#fff' : '#f87171';
-
-      generarConsejos(libreQ1, libreQ2, credQ1, credQ2, desgloseConsejos);
-      guardarLocal(false);
-    }
-
-    function generarConsejos(lQ1, lQ2, cQ1, cQ2, listaDeudas) {
-      const box = document.getElementById('consejos-box');
-      let tips = [];
-
-      if (creditoModo === 'dividir') {
-        tips.push(`<p>• <strong>Aparta ${fmt(cQ1)} en la 1ª Quincena</strong> para tu crédito fijo. Déjalo en un apartado intocable para liquidar los ${fmt(cQ1 + cQ2)} en la segunda quincena.</p>`);
-      }
-
-      if (listaDeudas.length > 0) {
-        listaDeudas.slice(0, 4).forEach(item => {
-          tips.push(`<p>• <strong>${item.nombre} (${fmt(item.monto)}):</strong> Programado para cubrirse en <em>${item.label}</em>.</p>`);
-        });
-      }
-
-      if (lQ1 < 0) {
-        tips.push(`<p style="color: #f87171;">⚠️️ <strong>Déficit en 1ª Qna:</strong> Faltan ${fmt(Math.abs(lQ1))}. Cambia una cuenta a 2ª quincena o divide un pago 50/50.</p>`);
-      } else if (lQ2 < 0) {
-        tips.push(`<p style="color: #f87171;">⚠️ <strong>Déficit en 2ª Qna:</strong> Faltan ${fmt(Math.abs(lQ2))}. Reasigna parte de tus compromisos a la 1ª quincena.</p>`);
-      } else {
-        tips.push(`<p style="color: #34d399;">✅ <strong>Flujo saludable:</strong> Ambas quincenas tienen remanente positivo tras cubrir tus compromisos.</p>`);
-      }
-
-      box.innerHTML = tips.join('');
-    }
-
-    function guardarLocal(alerta) {
-      const datos = {
-        q1: document.getElementById('inp-q1').value,
-        q2: document.getElementById('inp-q2').value,
-        cred: document.getElementById('inp-credito').value,
-        credModo: creditoModo,
-        casa: document.getElementById('inp-casa').value,
-        casaModo: document.getElementById('sel-casa-modo').value,
-        gas: document.getElementById('inp-gasolina').value,
-        gasModo: document.getElementById('sel-gasolina-modo').value,
-        deudas: deudas
-      };
-      localStorage.setItem('fincontrol_cuentas_v4', JSON.stringify(datos));
-      if (alerta) alert('¡Tus cuentas y montos se guardaron correctamente!');
-    }
-
-    function cargarLocal() {
-      const raw = localStorage.getItem('fincontrol_cuentas_v4');
-      if (!raw) return;
-      try {
-        const d = JSON.parse(raw);
-        if (d.q1) document.getElementById('inp-q1').value = d.q1;
-        if (d.q2) document.getElementById('inp-q2').value = d.q2;
-        if (d.cred) document.getElementById('inp-credito').value = d.cred;
-        if (d.casa) document.getElementById('inp-casa').value = d.casa;
-        if (d.casaModo) document.getElementById('sel-casa-modo').value = d.casaModo;
-        if (d.gas) document.getElementById('inp-gasolina').value = d.gas;
-        if (d.gasModo) document.getElementById('sel-gasolina-modo').value = d.gasModo;
-        if (d.credModo) setCreditoModo(d.credModo);
-        if (Array.isArray(d.deudas) && d.deudas.length > 0) {
-          deudas = d.deudas;
+      // 2. Gráfica de Barras Quincenal (Ingreso vs Compromisos)
+      const ctxQna = document.getElementById('quincenaBarChart').getContext('2d');
+      quincenaBarChartInstance = new Chart(ctxQna, {
+        type: 'bar',
+        data: {
+          labels: ['1ra Quincena', '2da Quincena'],
+          datasets: [
+            {
+              label: 'Ingreso',
+              data: [0, 0],
+              backgroundColor: '#0ea5e9',
+              borderRadius: 6
+            },
+            {
+              label: 'Compromisos',
+              data: [0, 0],
+              backgroundColor: '#f43f5e',
+              borderRadius: 6
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true,
+              grid: { color: '#1f2937' },
+              ticks: { color: '#94a3b8', font: { size: 10 } }
+            },
+            x: {
+              grid: { display: false },
+              ticks: { color: '#94a3b8', font: { size: 11 } }
+            }
+          },
+          plugins: {
+            legend: {
+              position: 'top',
+              labels: { boxWidth: 10, color: '#94a3b8', font: { size: 10 } }
+            }
+          }
         }
-      } catch(e) {}
+      });
     }
 
-    const inputsBase = ['inp-q1', 'inp-q2', 'inp-credito', 'inp-casa', 'inp-gasolina'];
-    inputsBase.forEach(id => {
-      document.getElementById(id).addEventListener('input', calcular);
-    });
+    // ACTUALIZACIÓN DE GRÁFICAS
+    function updateCharts() {
+      // Acumular categorías
+      const catTotals = {};
+      Object.keys(CATEGORIES).forEach(k => catTotals[k] = 0);
 
-    window.addEventListener('DOMContentLoaded', () => {
-      cargarLocal();
-      renderDeudas();
-      calcular();
-    });
+      let q1Exp = 0;
+      let q2Exp = 0;
+
+      AppState.expenses.forEach(e => {
+        if (catTotals[e.category] !== undefined) {
+          catTotals[e.category] += e.amount;
+        } else {
+          catTotals.otros += e.amount;
+        }
+
+        const assign = calculateAssignedQuincena(e);
+        q1Exp += assign.q1;
+        q2Exp += assign.q2;
+      });
+
+      // Donut Chart
+      const labels = [];
+      const dataValues = [];
+      const colors = [];
+
+      Object.entries(catTotals).forEach(([catKey, total]) => {
+        if (total > 0) {
+          labels.push(CATEGORIES[catKey].name);
+          dataValues.push(total);
+          colors.push(CATEGORIES[catKey].color);
+        }
+      });
+
+      if (categoryChartInstance) {
+        categoryChartInstance.data.labels = labels.length ? labels : ['Sin gastos'];
+        categoryChartInstance.data.datasets[0].data = dataValues.length ? dataValues : [1];
+        categoryChartInstance.data.datasets[0].backgroundColor = colors.length ? colors : ['#374151'];
+        categoryChartInstance.update();
+      }
+
+      // Bar Chart
+      if (quincenaBarChartInstance) {
+        quincenaBarChartInstance.data.datasets[0].data = [AppState.incomes.q1, AppState.incomes.q2];
+        quincenaBarChartInstance.data.datasets[1].data = [q1Exp, q2Exp];
+        quincenaBarChartInstance.update();
+      }
+    }
   </script>
 </body>
 </html>
