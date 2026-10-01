@@ -3,17 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>FinControl Quincenal</title>
-
-  <!-- PWA Manifest & Temas -->
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#0b0f19">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="FinControl">
-  <link rel="apple-touch-icon" href="icon-192.png">
-
+  <title>Controlador de Gastos Quincenal</title>
   <style>
     * {
       box-sizing: border-box;
@@ -71,8 +61,11 @@
       font-weight: 600;
       cursor: pointer;
     }
-    .btn-save:active { background: #1d4ed8; }
+    .btn-save:active {
+      background: #1d4ed8;
+    }
 
+    /* KPIs */
     .kpi-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -104,7 +97,9 @@
       font-weight: 800;
       color: #10b981;
     }
-    .kpi-value.danger { color: #ef4444; }
+    .kpi-value.danger {
+      color: #ef4444;
+    }
     .kpi-sub {
       font-size: 11px;
       color: #94a3b8;
@@ -126,9 +121,17 @@
       align-items: center;
       margin-bottom: 16px;
     }
-    .banner-total .label { font-size: 11px; color: #94a3b8; }
-    .banner-total .amount { font-size: 16px; font-weight: 700; color: #fff; }
+    .banner-total .label {
+      font-size: 11px;
+      color: #94a3b8;
+    }
+    .banner-total .amount {
+      font-size: 16px;
+      font-weight: 700;
+      color: #fff;
+    }
 
+    /* Cards & Inputs */
     .section-card {
       background: #131b2e;
       border: 1px solid #1e293b;
@@ -147,8 +150,12 @@
       align-items: center;
       justify-content: space-between;
     }
-    .field-group { margin-bottom: 10px; }
-    .field-group:last-child { margin-bottom: 0; }
+    .field-group {
+      margin-bottom: 10px;
+    }
+    .field-group:last-child {
+      margin-bottom: 0;
+    }
     label {
       display: block;
       font-size: 11px;
@@ -178,7 +185,9 @@
       outline: none;
       transition: border-color 0.2s;
     }
-    input[type=number] { padding-left: 24px; }
+    input[type=number] {
+      padding-left: 24px;
+    }
     input[type=number]:focus, input[type=text]:focus, input[type=date]:focus, select:focus {
       border-color: #3b82f6;
     }
@@ -187,12 +196,15 @@
       grid-template-columns: 1fr 1fr;
       gap: 10px;
     }
+
+    /* Subcard Deudas Dinámicas */
     .debt-item {
       background: #090d16;
       border: 1px solid #1e293b;
       border-radius: 12px;
       padding: 12px;
       margin-bottom: 12px;
+      position: relative;
     }
     .debt-header {
       display: flex;
@@ -207,6 +219,7 @@
       padding: 2px 7px;
       border-radius: 4px;
       font-weight: 600;
+      transition: all 0.3s;
     }
     .btn-del {
       background: transparent;
@@ -226,8 +239,13 @@
       font-size: 12px;
       font-weight: 600;
       cursor: pointer;
+      transition: background 0.2s;
     }
-    .btn-add:active { background: #2563eb20; }
+    .btn-add:active {
+      background: #2563eb20;
+    }
+
+    /* Botones píldora de asignación */
     .btn-group {
       display: flex;
       gap: 4px;
@@ -244,6 +262,7 @@
       font-weight: 500;
       cursor: pointer;
       text-align: center;
+      transition: all 0.2s ease-in-out;
     }
     .btn-pill.active {
       background: #2563eb;
@@ -251,6 +270,8 @@
       color: #fff;
       font-weight: 700;
     }
+
+    /* Tips */
     .tips-box {
       background: linear-gradient(180deg, #1e293b40, #131b2e);
       border: 1px solid #2563eb30;
@@ -269,7 +290,9 @@
       color: #cbd5e1;
       line-height: 1.5;
     }
-    .tips-content p { margin-bottom: 6px; }
+    .tips-content p {
+      margin-bottom: 6px;
+    }
   </style>
 </head>
 <body>
@@ -285,6 +308,7 @@
     <button class="btn-save" onclick="guardarLocal(true)">💾 Guardar</button>
   </header>
 
+  <!-- Resumen de Balances Quincenales -->
   <div class="kpi-grid">
     <div class="kpi-card">
       <div class="kpi-header">
@@ -324,6 +348,7 @@
     </div>
   </div>
 
+  <!-- SECCIÓN 1: INGRESOS -->
   <div class="section-card">
     <div class="section-title">1. Tus Ingresos por Quincena</div>
     <div class="grid-2">
@@ -344,6 +369,7 @@
     </div>
   </div>
 
+  <!-- SECCIÓN 2: CRÉDITO FIJO -->
   <div class="section-card">
     <div class="section-title">
       <span>2. Crédito Principal</span>
@@ -364,17 +390,24 @@
     </div>
   </div>
 
+  <!-- SECCIÓN 3: TARJETAS Y DEUDAS DINÁMICAS -->
   <div class="section-card">
     <div class="section-title">
       <span>3. Tarjetas, Tiendas y Deudas</span>
       <span class="badge" id="count-deudas">0 cuentas</span>
     </div>
-    <div id="lista-deudas"></div>
+    
+    <div id="lista-deudas">
+      <!-- Elementos dinámicos -->
+    </div>
+
     <button type="button" class="btn-add" onclick="agregarDeuda()">+ Agregar otra tarjeta o deuda</button>
   </div>
 
+  <!-- SECCIÓN 4: CASA Y GASOLINA -->
   <div class="section-card">
     <div class="section-title">4. Gastos Corrientes</div>
+    
     <div class="grid-2" style="margin-bottom: 10px;">
       <div>
         <label>Gasto de Casa / Despensa</label>
@@ -414,17 +447,21 @@
     </div>
   </div>
 
+  <!-- SECCIÓN 5: ESTRATEGIA DE PAGO -->
   <div class="tips-box">
     <div class="tips-title">💡 Consejos para tu Siguiente Pago</div>
-    <div id="consejos-box" class="tips-content"></div>
+    <div id="consejos-box" class="tips-content">
+      <!-- Consejos dinámicos -->
+    </div>
   </div>
 
   <script>
     let creditoModo = 'dividir';
+    
+    // Lista inicial de deudas
     let deudas = [
       { id: 1, tipo: 'tc', nombre: 'Tarjeta de Crédito 1', monto: '', fecha: '', modo: 'auto' },
-      { id: 2, tipo: 'tc', nombre: 'Tarjeta de Crédito 2', monto: '', fecha: '', modo: 'auto' },
-      { id: 3, tipo: 'meli', nombre: 'Mercado Libre', monto: '', fecha: '', modo: 'auto' }
+      { id: 2, tipo: 'tc', nombre: 'Tarjeta de Crédito 2', monto: '', fecha: '', modo: 'auto' }
     ];
 
     function fmt(val) {
@@ -435,14 +472,19 @@
       creditoModo = modo;
       ['div', 'q1', 'q2'].forEach(m => {
         const btn = document.getElementById('btn-cred-' + m);
-        btn.className = (m === modo || (m === 'div' && modo === 'dividir')) ? 'btn-pill active' : 'btn-pill';
+        if (m === modo || (m === 'div' && modo === 'dividir')) {
+          btn.className = 'btn-pill active';
+        } else {
+          btn.className = 'btn-pill';
+        }
       });
       calcular();
     }
 
     function agregarDeuda() {
+      const nuevoId = Date.now();
       deudas.push({
-        id: Date.now(),
+        id: nuevoId,
         tipo: 'tienda',
         nombre: 'Nueva cuenta / Tienda',
         monto: '',
@@ -463,13 +505,21 @@
       const item = deudas.find(d => d.id === id);
       if (item) {
         item[campo] = valor;
+        
+        // Asignar sugerencia de nombre si cambia el tipo
         if (campo === 'tipo') {
           if (valor === 'meli') item.nombre = 'Mercado Libre';
           else if (valor === 'amazon') item.nombre = 'Amazon';
           else if (valor === 'tc') item.nombre = 'Tarjeta de Crédito';
           else if (valor === 'tienda') item.nombre = 'Liverpool / Coppel';
+        }
+
+        // Repintar la interfaz SOLO si el cambio afecta a los botones o las etiquetas.
+        // Esto evita que se pierda el foco del teclado al escribir números o letras.
+        if (campo === 'tipo' || campo === 'modo' || campo === 'fecha') {
           renderDeudas();
         }
+        
         calcular();
       }
     }
@@ -479,6 +529,7 @@
       if (d.modo === 'q2') return { q1: 0, q2: 1, label: '2ª Quincena' };
       if (d.modo === 'dividir') return { q1: 0.5, q2: 0.5, label: '50% y 50%' };
       
+      // Auto por fecha (YYYY-MM-DD)
       if (d.fecha) {
         const partes = d.fecha.split('-');
         if (partes.length === 3) {
@@ -486,9 +537,11 @@
           const mes = parseInt(partes[1], 10);
           const nombresMes = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
           const mesNom = nombresMes[mes - 1] || '';
-          return dia <= 15 
-            ? { q1: 1, q2: 0, label: `1ª Qna (${dia} ${mesNom})` }
-            : { q1: 0, q2: 1, label: `2ª Qna (${dia} ${mesNom})` };
+          if (dia <= 15) {
+            return { q1: 1, q2: 0, label: `1ª Qna (${dia} ${mesNom})` };
+          } else {
+            return { q1: 0, q2: 1, label: `2ª Qna (${dia} ${mesNom})` };
+          }
         }
       }
       return { q1: 1, q2: 0, label: '1ª Quincena (Sin fecha)' };
@@ -520,7 +573,7 @@
               </div>
               <div>
                 <label>Nombre / Comercio</label>
-                <input type="text" value="${d.nombre || ''}" placeholder="Ej: Nu, Liverpool" oninput="actualizarDeuda(${d.id}, 'nombre', this.value)">
+                <input type="text" value="${d.nombre || ''}" placeholder="Ej: Nu, Liverpool, etc." oninput="actualizarDeuda(${d.id}, 'nombre', this.value)">
               </div>
             </div>
 
@@ -533,7 +586,7 @@
                 </div>
               </div>
               <div>
-                <label>Fecha de Pago</label>
+                <label>Fecha de Pago (Día y Mes)</label>
                 <input type="date" value="${d.fecha || ''}" onchange="actualizarDeuda(${d.id}, 'fecha', this.value)">
               </div>
             </div>
@@ -561,25 +614,42 @@
       const q1Ingreso = parseFloat(document.getElementById('inp-q1').value) || 0;
       const q2Ingreso = parseFloat(document.getElementById('inp-q2').value) || 0;
       const creditoMonto = parseFloat(document.getElementById('inp-credito').value) || 0;
+
       const casaMonto = parseFloat(document.getElementById('inp-casa').value) || 0;
       const casaModo = document.getElementById('sel-casa-modo').value;
+
       const gasMonto = parseFloat(document.getElementById('inp-gasolina').value) || 0;
       const gasModo = document.getElementById('sel-gasolina-modo').value;
 
+      // Desglose Crédito Fijo
       let credQ1 = 0, credQ2 = 0;
       if (creditoModo === 'dividir') { credQ1 = creditoMonto / 2; credQ2 = creditoMonto / 2; }
       else if (creditoModo === 'q1') { credQ1 = creditoMonto; }
       else { credQ2 = creditoMonto; }
 
-      let deudasQ1 = 0, deudasQ2 = 0, desgloseConsejos = [];
+      // Desglose Dinámico de Deudas (TCs, Mercado Libre, Amazon, etc.)
+      let deudasQ1 = 0;
+      let deudasQ2 = 0;
+      let desgloseConsejos = [];
+
       deudas.forEach(d => {
         const m = parseFloat(d.monto) || 0;
         const asig = resolverAsignacionDeuda(d);
-        deudasQ1 += (m * asig.q1);
-        deudasQ2 += (m * asig.q2);
-        if (m > 0) desgloseConsejos.push({ nombre: d.nombre || 'Deuda', monto: m, label: asig.label });
+        const parteQ1 = m * asig.q1;
+        const parteQ2 = m * asig.q2;
+        deudasQ1 += parteQ1;
+        deudasQ2 += parteQ2;
+
+        if (m > 0) {
+          desgloseConsejos.push({
+            nombre: d.nombre || 'Deuda sin nombre',
+            monto: m,
+            label: asig.label
+          });
+        }
       });
 
+      // Casa y Gasolina
       const distCasa = resolverGastoSimple(casaModo, casaMonto);
       const distGas = resolverGastoSimple(gasModo, gasMonto);
 
@@ -592,6 +662,7 @@
       const gastosMes = gastosQ1 + gastosQ2;
       const totalMesLibre = (q1Ingreso + q2Ingreso) - gastosMes;
 
+      // Mostrar Resultados
       document.getElementById('disp-q1-gasto').innerText = fmt(gastosQ1);
       const elemQ1 = document.getElementById('disp-q1-libre');
       elemQ1.innerText = fmt(libreQ1);
@@ -616,20 +687,23 @@
       let tips = [];
 
       if (creditoModo === 'dividir') {
-        tips.push(`<p>• <strong>Aparta ${fmt(cQ1)} en la 1ª Quincena</strong> para tu crédito fijo de $7,212.05.</p>`);
+        tips.push(`<p>• <strong>Aparta ${fmt(cQ1)} en la 1ª Quincena</strong> para tu crédito fijo. Déjalo en un apartado intocable para liquidar los ${fmt(cQ1 + cQ2)} en la segunda quincena.</p>`);
       }
+
       if (listaDeudas.length > 0) {
-        listaDeudas.slice(0, 3).forEach(item => {
-          tips.push(`<p>• <strong>${item.nombre} (${fmt(item.monto)}):</strong> Liquidar en <em>${item.label}</em>.</p>`);
+        listaDeudas.slice(0, 4).forEach(item => {
+          tips.push(`<p>• <strong>${item.nombre} (${fmt(item.monto)}):</strong> Programado para cubrirse en <em>${item.label}</em>.</p>`);
         });
       }
+
       if (lQ1 < 0) {
-        tips.push(`<p style="color: #f87171;">⚠️ <strong>Déficit 1ª Qna:</strong> Faltan ${fmt(Math.abs(lQ1))}. Reubica pagos a 2ª quincena.</p>`);
+        tips.push(`<p style="color: #f87171;">⚠️️ <strong>Déficit en 1ª Qna:</strong> Faltan ${fmt(Math.abs(lQ1))}. Cambia una cuenta a 2ª quincena o divide un pago 50/50.</p>`);
       } else if (lQ2 < 0) {
-        tips.push(`<p style="color: #f87171;">⚠️ <strong>Déficit 2ª Qna:</strong> Faltan ${fmt(Math.abs(lQ2))}. Pasa apartados de tu 1ª quincena.</p>`);
+        tips.push(`<p style="color: #f87171;">⚠️ <strong>Déficit en 2ª Qna:</strong> Faltan ${fmt(Math.abs(lQ2))}. Reasigna parte de tus compromisos a la 1ª quincena.</p>`);
       } else {
-        tips.push(`<p style="color: #34d399;">✅ <strong>Flujo saludable:</strong> Ambas quincenas tienen remanente a favor.</p>`);
+        tips.push(`<p style="color: #34d399;">✅ <strong>Flujo saludable:</strong> Ambas quincenas tienen remanente positivo tras cubrir tus compromisos.</p>`);
       }
+
       box.innerHTML = tips.join('');
     }
 
@@ -645,12 +719,12 @@
         gasModo: document.getElementById('sel-gasolina-modo').value,
         deudas: deudas
       };
-      localStorage.setItem('fincontrol_pwa_data', JSON.stringify(datos));
-      if (alerta) alert('¡Datos guardados con éxito!');
+      localStorage.setItem('fincontrol_cuentas_v4', JSON.stringify(datos));
+      if (alerta) alert('¡Tus cuentas y montos se guardaron correctamente!');
     }
 
     function cargarLocal() {
-      const raw = localStorage.getItem('fincontrol_pwa_data');
+      const raw = localStorage.getItem('fincontrol_cuentas_v4');
       if (!raw) return;
       try {
         const d = JSON.parse(raw);
@@ -662,21 +736,16 @@
         if (d.gas) document.getElementById('inp-gasolina').value = d.gas;
         if (d.gasModo) document.getElementById('sel-gasolina-modo').value = d.gasModo;
         if (d.credModo) setCreditoModo(d.credModo);
-        if (Array.isArray(d.deudas) && d.deudas.length > 0) deudas = d.deudas;
+        if (Array.isArray(d.deudas) && d.deudas.length > 0) {
+          deudas = d.deudas;
+        }
       } catch(e) {}
     }
 
-    // Registro del Service Worker
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js')
-          .then(reg => console.log('SW registrado', reg))
-          .catch(err => console.log('SW error', err));
-      });
-    }
-
     const inputsBase = ['inp-q1', 'inp-q2', 'inp-credito', 'inp-casa', 'inp-gasolina'];
-    inputsBase.forEach(id => document.getElementById(id).addEventListener('input', calcular));
+    inputsBase.forEach(id => {
+      document.getElementById(id).addEventListener('input', calcular);
+    });
 
     window.addEventListener('DOMContentLoaded', () => {
       cargarLocal();
